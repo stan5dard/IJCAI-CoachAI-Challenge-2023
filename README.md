@@ -1,2 +1,2 @@
 # IJCAI-CoachAI-Challenge-2023
-Badminseok
+This is a repository of IJCAI-CoachAI-Challenge-2023 Team Badminseok

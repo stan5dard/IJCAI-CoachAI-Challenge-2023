@@ -6,7 +6,6 @@ import numpy as np
 pd.options.mode.chained_assignment = None
 
 PAD = 0
-
 class BadmintonDataset(Dataset):
     def __init__(self, matches, config):
         super().__init__()
@@ -163,11 +162,10 @@ def prepare_dataset2(config, train_proportion=0.8, val_proportion=0.1, test_prop
 
     return config, train_dataloader, val_dataloader, test_dataloader, train_matches, val_matches, test_matches
 
-
 def prepare_dataset(config):
-    train_matches = pd.read_csv(f"{config['data_folder']}train_0.7.csv")
+    train_matches = pd.read_csv(f"{config['data_folder']}train_0.85.csv")
     val_matches = pd.read_csv(f"{config['data_folder']}validation_0.15.csv")
-    test_matches = pd.read_csv(f"{config['data_folder']}test_given_0.15.csv")
+    test_matches = pd.read_csv(f"{config['data_folder']}test_question_0.15.csv")
 
     # encode shot type
     codes_type, uniques_type = pd.factorize(train_matches['type'])
@@ -213,11 +211,10 @@ def prepare_dataset(config):
 
     return config, train_dataloader, val_dataloader, test_dataloader, train_matches, val_matches, test_matches
 
-
 def prepare_dataset_cross(config):
     train_matches = pd.read_csv(f"{config['data_folder']}train_0.85.csv")
     val_matches = pd.read_csv(f"{config['data_folder']}validation_0.15.csv")
-    test_matches = pd.read_csv(f"{config['data_folder']}test_given_0.15.csv")
+    test_matches = pd.read_csv(f"{config['data_folder']}test_question_0.15.csv")
 
     # encode shot type
     codes_type, uniques_type = pd.factorize(train_matches['type'])

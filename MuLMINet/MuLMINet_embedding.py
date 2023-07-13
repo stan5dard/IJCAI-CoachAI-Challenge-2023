@@ -2,9 +2,7 @@ import torch
 import torch.nn as nn
 import numpy as np
 
-
 PAD = 0
-
 
 class PositionalEncoding(nn.Module):
     def __init__(self, d_hid, encode_length, n_position=200):
@@ -33,11 +31,9 @@ class PositionalEncoding(nn.Module):
             # need to offset when decoding
             return x + self.pos_table[:, self.encode_length:self.encode_length+x.size(1)].clone().detach()
 
-
 class PlayerEmbedding(nn.Embedding):
     def __init__(self, player_num, embed_dim):
         super(PlayerEmbedding, self).__init__(player_num, embed_dim, padding_idx=PAD)
-
 
 class ShotEmbedding(nn.Embedding):
     def __init__(self, shot_num, embed_dim):

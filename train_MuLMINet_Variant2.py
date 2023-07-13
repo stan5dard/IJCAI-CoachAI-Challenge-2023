@@ -1,20 +1,18 @@
 from badmintoncleaner import prepare_dataset_cross
 from utils import draw_loss_cross
 import argparse
-import os
 import torch
 import torch.nn as nn
 from evaluation import StrokeEvaluator
-from generator_model3_ver2 import generate_test, generate
+from generator_MuLMINet_Variant2 import generate
 import torch.distributed
 import torch.utils.data.distributed
 import torch.multiprocessing
 from tqdm import tqdm
 from utils import save_fold
-from loss import SupervisedContrastiveLoss, FocalLoss
+from loss import FocalLoss
 from sklearn.model_selection import KFold
 from utils import EarlyStopping 
-
 
 def get_argument():
     opt = argparse.ArgumentParser()
@@ -48,7 +46,7 @@ def get_argument():
                         help="learning rate")
     opt.add_argument("--epochs",
                         type=int,
-                        default=300,
+                        default=3,
                         help="epochs")
     opt.add_argument("--n_layers",
                         type=int,
@@ -81,7 +79,7 @@ def get_argument():
     opt.add_argument("--K",
                         type=int,
                         default=5,
-                        help="Number of fold for dataset")
+                        help="Number of fold for dataset3")
     opt.add_argument("--sample",
                         type=int,
                         default=10,
@@ -148,12 +146,12 @@ if __name__ == "__main__":
                         print('')
                         print(hyper)
                         config['output_folder_name'] = os.path.join("./model_3_ver2_crossvalidation_corrected", hyper)
-                        config['data_folder'] = './dataset/'
+                        config['data_folder'] = './dataset3/'
                         config['model_folder'] = './model/'
                         model_type = config['model_type']
                         set_seed(config['seed_value'])
 
-                        # Clean data and Prepare dataset
+                        # Clean data and Prepare dataset3
                         config, train_dataloader, test_dataloader, train_dataset, test_dataset, train_matches, test_matches = prepare_dataset_cross(config)
 
                         device = torch.device(f"cuda:{config['gpu_num']}" if torch.cuda.is_available() else "cpu")

@@ -4,14 +4,13 @@ import torch
 import math
 from tqdm import tqdm
 
-
 class StrokeEvaluator:
     def __init__(self, path, fold=None):
         self.path = path
         self.filename = fold
         self.type_list = ['short service', 'net shot', 'lob', 'clear', 'drop', 'push/rush', 'smash', 'defensive shot', 'drive', 'long service']
         # self.prediction = pd.read_csv(f"{path}/prediction.csv")
-        self.ground_truth = pd.read_csv("./dataset/test_answer_0.15.csv")
+        self.ground_truth = pd.read_csv("dataset3/test_answer_0.15.csv")
 
         self.l1_loss = torch.nn.L1Loss(reduction='mean')
         self.ce_loss = torch.nn.NLLLoss(reduction='mean')   # we use NLL since we need to check if we need to softmax the probs of each shot
@@ -105,7 +104,6 @@ class StrokeEvaluator:
         true_area = torch.tensor([[x, y] for x, y in zip(true_landing_x, true_landing_y)])
         area_score = self.l1_loss(prediction_area, true_area)
         return area_score.item()
-
 
 if __name__ == "__main__":
     path = './models_tuning/lr0.0001bat32dim64alpha0.2layer1epoch300'

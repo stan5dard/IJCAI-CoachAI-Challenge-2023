@@ -1,48 +1,35 @@
 from badmintoncleaner import prepare_dataset
 import ast
-import sys
-import pandas as pd
 import torch
-import torch.nn as nn
 from tqdm import tqdm
-
 
 def set_seed(seed_value):
     torch.manual_seed(seed_value)
     torch.cuda.manual_seed(seed_value)
     torch.cuda.manual_seed_all(seed_value)    # gpu vars
 
-def generate(model_path, fold=None):
+def generate(model_path, fold):
     SAMPLES = 6      # set to 6 to meet the requirement of this challenge
 
     # model_path = './lr0.0001bat32dim256' # sys.argv[1]
-    if fold is not None:
-        config = ast.literal_eval(open(f"{model_path}/config{fold}").readline())
-    else:
-        config = ast.literal_eval(open(f"{model_path}/config").readline())
-
+    config = ast.literal_eval(open(f"{model_path}/config{fold}").readline())
     set_seed(config['seed_value'])
 
     # Prepare Dataset
     config, train_dataloader, val_dataloader, test_dataloader, train_matches, val_matches, test_matches = prepare_dataset(config)
     device = torch.device(f"cuda:{config['gpu_num']}" if torch.cuda.is_available() else "cpu")
-    # device = "cpu"
 
     # load model
-    from ShuttleNet.ShuttleNet import ShotGenEncoder_model3, ShotGenPredictor_model3
+    from ShuttleNet.ShuttleNet import ShotGenEncoder_model3_ver2, ShotGenPredictor_model3_ver2
     from ShuttleNet.ShuttleNet_runner import shotgen_generator_model3
-    encoder = ShotGenEncoder_model3(config)
-    decoder = ShotGenPredictor_model3(config)
+    encoder = ShotGenEncoder_model3_ver2(config)
+    decoder = ShotGenPredictor_model3_ver2(config)
 
     encoder.to(device), decoder.to(device)
 
     current_model_path = model_path + '/'
-    if fold is not None:
-        encoder_path = current_model_path + 'encoder' + str(fold)
-        decoder_path = current_model_path + 'decoder' + str(fold)
-    else:
-        encoder_path = current_model_path + 'encoder'
-        decoder_path = current_model_path + 'decoder'
+    encoder_path = current_model_path + 'encoder' + str(fold)
+    decoder_path = current_model_path + 'decoder' + str(fold)
 
     # print(f"loading {encoder_path} and {decoder_path}")
     saved_encoder_checkpoint = torch.load(encoder_path, map_location=device)
@@ -176,5 +163,5 @@ def generate_test(model_path):
                 performance_log.write("\n")
 
 if __name__ == "__main__":
-    model_path = '/home/hcis/Desktop/Track 2_ Stroke Forecasting_final_revision/src/model_3_crossvalidation/lr0.0001bat32dim32alpha0.4layer1epoch300'
-    generate(model_path, fold=1)
+    model_path = './models_tuning/lr0.0001bat32dim64alpha0.2layer1epoch300'
+    generate(model_path)

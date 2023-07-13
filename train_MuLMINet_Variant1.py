@@ -1,19 +1,16 @@
 from badmintoncleaner import prepare_dataset_cross
 from utils import draw_loss_cross
 import argparse
-import os
 import torch
 import torch.nn as nn
 from evaluation import StrokeEvaluator
-from generator_model3 import generate_test, generate
+from generator_MuLMINet_Variant1 import generate
 import torch.distributed
 import torch.utils.data.distributed
 import torch.multiprocessing
 from tqdm import tqdm
 from utils import save_fold
-from loss import SupervisedContrastiveLoss
 from sklearn.model_selection import KFold
-
 
 def get_argument():
     opt = argparse.ArgumentParser()
@@ -47,7 +44,7 @@ def get_argument():
                         help="learning rate")
     opt.add_argument("--epochs",
                         type=int,
-                        default=300,
+                        default=3,
                         help="epochs")
     opt.add_argument("--n_layers",
                         type=int,
@@ -80,7 +77,7 @@ def get_argument():
     opt.add_argument("--K",
                         type=int,
                         default=5,
-                        help="Number of fold for dataset")
+                        help="Number of fold for dataset3")
     opt.add_argument("--sample",
                         type=int,
                         default=10,
@@ -100,30 +97,23 @@ def get_argument():
     config = vars(opt.parse_args())
     return config
 
-
 def set_seed(seed_value):
     torch.manual_seed(seed_value)
     torch.cuda.manual_seed(seed_value)
     torch.cuda.manual_seed_all(seed_value)    # gpu vars
 
-
 if __name__ == "__main__":
 
     import os
     # os.environ['KMP_DUPLICATE_LIB_OK'] = 'True'
-    # os.environ['CUDA_LAUNCH_BLOCKING'] = "1"
+    os.environ['CUDA_LAUNCH_BLOCKING'] = "1"
     # os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,3,4,5,6,7"
 
-
-    # lr_list = [0.0001, 0.0003, 0.0005, 0.001, 0.003, 0.005]
-    # batchsize_list = [32, 64, 128]
-    # dim_list = [32, 64, 128, 256]
-    # alpha_list = [0.1, 0.2, 0.4, 0.5, 0.6, 0.8, 0.9]
     lr_list = [0.0001]
     batchsize_list = [32]
     dim_list = [32]
     layer_list = [3]
-    alpha_list = [0.4]
+    alpha_list = [0.4, 0.5]
     
     for lr_value in lr_list:
         for batch_value in batchsize_list:
@@ -145,13 +135,13 @@ if __name__ == "__main__":
                         hyper = 'lr' + str(lr_value) + 'bat' + str(batch_value) + 'dim' + str(dim_value) + 'alpha' + str(alpha) + 'layer' + str(layer) + 'epoch' + str(config['epochs'])
                         print('')
                         print(hyper)
-                        config['output_folder_name'] = os.path.join("./model_3_crossvalidation_IJCAI", hyper)
-                        config['data_folder'] = './dataset/'
+                        config['output_folder_name'] = os.path.join("./MuLMINET_IJCAI", hyper)
+                        config['data_folder'] = './dataset3/'
                         config['model_folder'] = './model/'
                         model_type = config['model_type']
                         set_seed(config['seed_value'])
 
-                        # Clean data and Prepare dataset
+                        # Clean data and Prepare dataset3
                         config, train_dataloader, test_dataloader, train_dataset, test_dataset, train_matches, test_matches = prepare_dataset_cross(config)
 
                         device = torch.device(f"cuda:{config['gpu_num']}" if torch.cuda.is_available() else "cpu")
@@ -164,8 +154,8 @@ if __name__ == "__main__":
                                 os.remove(config['output_folder_name'] + "/" + file)
 
                         # read model
-                        from ShuttleNet.ShuttleNet import ShotGenEncoder_model3, ShotGenPredictor_model3, ShotGenEncoder, ShotGenPredictor
-                        from ShuttleNet.ShuttleNet_runner import shotGen_trainer, shotGen_train_epoch_model3, shotGen_validate_epoch_model3
+                        from MuLMINet.MuLMINet import ShotGenEncoder_MuLMINet_Variant1, ShotGenPredictor_MuLMINet_Variant1
+                        from MuLMINet.MuLMINet_runner import shotGen_train_epoch_MuLMINet, shotGen_validate_epoch_MuLMINet
                         kfold = KFold(n_splits=5, shuffle=True)
                         
                         for fold, (train_idx, val_idx) in enumerate(kfold.split(train_dataset)):
@@ -174,8 +164,8 @@ if __name__ == "__main__":
                             trainloader = torch.utils.data.DataLoader(train_dataset, batch_size=config['batch_size'], sampler=train_subsampler) # 해당하는 index 추출
                             valloader = torch.utils.data.DataLoader(train_dataset, batch_size=config['batch_size'], sampler=val_subsampler)
     
-                            encoder = ShotGenEncoder_model3(config)
-                            decoder = ShotGenPredictor_model3(config)
+                            encoder = ShotGenEncoder_MuLMINet_Variant1(config)
+                            decoder = ShotGenPredictor_MuLMINet_Variant1(config)
                             # encoder = ShotGenEncoder2(config)
                             # decoder = ShotGenPredictor2(config)
                             encoder.area_embedding.weight = decoder.shotgen_decoder.area_embedding.weight
@@ -227,18 +217,20 @@ if __name__ == "__main__":
                                 'opponentloc': []
                             }
 
-                        
-                            train_loss = 1000000000
-                            val_loss = 1000000000
+                            train_loss = 1000000000.000
+                            val_loss = 1000000000.000
                             for epoch in tqdm(range(config['epochs']), desc='Epoch: '):
-                                new_train_loss = shotGen_train_epoch_model3(data_loader=trainloader, encoder=encoder, decoder=decoder, criterion=criterion, encoder_optimizer=encoder_optimizer, decoder_optimizer=decoder_optimizer, config=config, record_loss = record_train_loss, device=device)
-                                new_val_loss = shotGen_validate_epoch_model3(data_loader=valloader, encoder=encoder, decoder=decoder, criterion=criterion, encoder_optimizer=encoder_optimizer, decoder_optimizer=decoder_optimizer, config=config, record_loss = record_validation_loss, device=device)
+                                new_train_loss = shotGen_train_epoch_MuLMINet(data_loader=trainloader, encoder=encoder, decoder=decoder, criterion=criterion, encoder_optimizer=encoder_optimizer, decoder_optimizer=decoder_optimizer, config=config, record_loss = record_train_loss, device=device)
+                                new_val_loss = shotGen_validate_epoch_MuLMINet(data_loader=valloader, encoder=encoder, decoder=decoder, criterion=criterion, encoder_optimizer=encoder_optimizer, decoder_optimizer=decoder_optimizer, config=config, record_loss = record_validation_loss, device=device)
 
                                 if new_val_loss < val_loss:
                                     val_loss = new_val_loss
                                     save_fold(encoder, decoder, config, new_val_loss, fold, epoch=None)
-                                
-                            
+
                             draw_loss_cross(record_train_loss, record_validation_loss, config, fold)
+
+                            # generated the csv file
                             generate(config['output_folder_name'], fold)
+
+                            # evaluate the score
                             stroke_evaluator = StrokeEvaluator(path=config['output_folder_name'], fold=fold)

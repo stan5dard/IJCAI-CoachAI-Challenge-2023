@@ -5,9 +5,9 @@ The increasing use of artificial intelligence (AI) technology in turn-based spor
 
 In this challenge, the objective is to predict the future stroke shot type and area coordinates based on the data from the first 4 strokes. The evaluation metrics used for this task are defined as follows:
 
-# $Score=min(l_1, l_2, ..., l_6)$
+**$Score=min(l_1, l_2, ..., l_6)$**
 
-# $l_i=AVG(CE + MAE)$
+**$l_i=AVG(CE + MAE)$**
 
 
 The shot type is evaluated using the Cross-Entropy (CE) loss, which measures the discrepancy between the predicted and actual shot-type probabilities. The area coordinate is evaluated using the Mean Absolute Error (MAE), which quantifies the average difference between the predicted and actual area coordinates.

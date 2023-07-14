@@ -10,7 +10,7 @@ class StrokeEvaluator:
         self.filename = fold
         self.type_list = ['short service', 'net shot', 'lob', 'clear', 'drop', 'push/rush', 'smash', 'defensive shot', 'drive', 'long service']
         # self.prediction = pd.read_csv(f"{path}/prediction.csv")
-        self.ground_truth = pd.read_csv("dataset3/test_answer_0.15.csv")
+        self.ground_truth = pd.read_csv("aa/aa/aa/dataset3/test_answer_0.15.csv")
 
         self.l1_loss = torch.nn.L1Loss(reduction='mean')
         self.ce_loss = torch.nn.NLLLoss(reduction='mean')   # we use NLL since we need to check if we need to softmax the probs of each shot

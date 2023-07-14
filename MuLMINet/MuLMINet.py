@@ -478,7 +478,7 @@ class ShotGenEncoder_MuLMINet_Variant2(nn.Module):
                 input_player_location_area, input_opponent_location_area, src_mask=None, return_attns=False):
         
         enc_slf_attn_list = []
-
+        input_height[input_height == -2147483648] = 1  # to replace the overflow value
         area = torch.cat((input_x.unsqueeze(-1), input_y.unsqueeze(-1)), dim=-1).float()
         embedded_area = F.relu(self.area_embedding(area))
         embedded_shot = self.shot_embedding(input_shot)

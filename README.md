@@ -1,5 +1,5 @@
 ## IJCAI-CoachAI-Challenge-2023
-This is a repository of IJCAI-CoachAI-Challenge-2023 Team Badminseok [https://sites.google.com/view/coachai-challenge-2023/]
+This is a repository of IJCAI-CoachAI-Challenge-2023 Team Badminseok [https://sites.google.com/view/coachai-challenge-2023/, https://github.com/wywyWang/CoachAI-Projects/tree/main]
 
 The CoachAI Badminton Challenge 2023 is a competition that aims to apply intelligence technology to badminton analytics. The challenge is divided into two tasks:
 
